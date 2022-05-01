@@ -14,8 +14,33 @@ if [ $EUID -ne 0 ]; then
   exit 1
 fi
 
+check_ifconfig() {
+  type ifconfig &>/dev/null
+  if [ $? -ne 0 ]; then
+    case $DISTRO in
+    "arch")
+      yes | pacman -S net-tools
+      ;;
+    "debian")
+      apt install -y net-tools
+      ;;
+    "fedora")
+      dnf install -y net-tools
+      ;;
+    "rhel")
+      yum install -y net-tools
+      ;;
+    "suse")
+      zypper install -y net-tools
+      ;;
+    esac
+  fi
+}
+
+check_ifconfig
+
 FILTER=$(
-  ifconfig | egrep "\b([a-z0-9]+:)" | awk '{print$1}' | cut -d : -f 1 | grep [^ether]
+  ifconfig | egrep "\b([a-z0-9]+:)" | awk '{print$1}' | cut -d : -f 1 | grep [^etherinet46]
 )
 FILTER_ARRAY=()
 COUNTER=1
@@ -76,7 +101,6 @@ read NUMBER
 change_mac() {
   type macchanger &>/dev/null
   if [ $? -ne 0 ]; then
-    echo 'Start installing macchanger...'
     case $DISTRO in
     "arch")
       yes | pacman -S macchanger
@@ -94,11 +118,10 @@ change_mac() {
       zypper install -y macchanger
       ;;
     esac
-    echo "macchanger installed"
   fi
-  ip link set dev ${FILTER_ARRAY[$NUMBER - 1]} down
+  ifconfig ${FILTER_ARRAY[$NUMBER - 1]} down
   macchanger -r ${FILTER_ARRAY[$NUMBER - 1]}
-  ip link set dev ${FILTER_ARRAY[$NUMBER - 1]} up
+  ifconfig ${FILTER_ARRAY[$NUMBER - 1]} up
   macchanger -s
 }
 
