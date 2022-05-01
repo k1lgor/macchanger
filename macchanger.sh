@@ -19,6 +19,36 @@ FILTER=$(
 )
 FILTER_ARRAY=()
 COUNTER=1
+DISTRO=''
+
+checking_distro() {
+  grep -i arch /etc/os-release &>/dev/null
+  if [ $? -eq 0 ]; then
+    DISTRO=arch
+  fi
+
+  egrep -iw 'debian|ubuntu|kali' /etc/os-release &>/dev/null
+  if [ $? -eq 0 ]; then
+    DISTRO=debian
+  fi
+
+  grep -i rhel /etc/os-release &>/dev/null
+  if [ $? -eq 0 ]; then
+    DISTRO=rhel
+  fi
+
+  grep -i suse /etc/os-release &>/dev/null
+  if [ $? -eq 0 ]; then
+    DISTRO=suse
+  fi
+
+  grep -i fedora /etc/os-release &>/dev/null
+  if [ $? -eq 0 ]; then
+    DISTRO=fedora
+  fi
+}
+
+checking_distro
 
 all_devices() {
   for i in $FILTER; do
@@ -43,12 +73,29 @@ TOTAL_DEVICES=${#FILTER_ARRAY[@]}
 echo "Choose your device by the number: [number]"
 read NUMBER
 
-if [ ! type "$macchanger" ]; then
-  echo 'Need to install macchanger'
-  exit 1
-fi
-
 change_mac() {
+  type macchanger &>/dev/null
+  if [ $? -ne 0 ]; then
+    echo 'Start installing macchanger...'
+    case $DISTRO in
+    "arch")
+      yes | pacman -S macchanger
+      ;;
+    "debian")
+      apt install -y macchanger
+      ;;
+    "fedora")
+      dnf install -y macchanger
+      ;;
+    "rhel")
+      yum install -y macchanger
+      ;;
+    "suse")
+      zypper install -y macchanger
+      ;;
+    esac
+    echo "macchanger installed"
+  fi
   ip link set dev ${FILTER_ARRAY[$NUMBER - 1]} down
   macchanger -r ${FILTER_ARRAY[$NUMBER - 1]}
   ip link set dev ${FILTER_ARRAY[$NUMBER - 1]} up
