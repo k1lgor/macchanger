@@ -42,11 +42,12 @@ TOTAL_DEVICES=${#FILTER_ARRAY[@]}
 
 echo "Choose your device by the number: [number]"
 read NUMBER
+echo ${FILTER_ARRAY[$NUMBER - 1]}
 
 change_mac() {
-  ip link set dev ${FILTER_ARRAY[$NUMBER]} down
-  macchanger -r ${FILTER_ARRAY[$NUMBER]}
-  ip link set dev ${FILTER_ARRAY[$NUMBER]} up
+  ip link set dev ${FILTER_ARRAY[$NUMBER - 1]} down
+  macchanger -r ${FILTER_ARRAY[$NUMBER - 1]}
+  ip link set dev ${FILTER_ARRAY[$NUMBER - 1]} up
   macchanger -s
 }
 
