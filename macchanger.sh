@@ -42,9 +42,8 @@ TOTAL_DEVICES=${#FILTER_ARRAY[@]}
 
 echo "Choose your device by the number: [number]"
 read NUMBER
-echo ${FILTER_ARRAY[$NUMBER - 1]}
 
-if [ ! type "$macchanger" ] &>/dev/null; then
+if [ ! type "$macchanger" ]; then
   echo 'Need to install macchanger'
   exit 1
 fi
