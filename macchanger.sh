@@ -44,6 +44,11 @@ echo "Choose your device by the number: [number]"
 read NUMBER
 echo ${FILTER_ARRAY[$NUMBER - 1]}
 
+if [ ! type "$macchanger" ] &>/dev/null; then
+  echo 'Need to install macchanger'
+  exit 1
+fi
+
 change_mac() {
   ip link set dev ${FILTER_ARRAY[$NUMBER - 1]} down
   macchanger -r ${FILTER_ARRAY[$NUMBER - 1]}
